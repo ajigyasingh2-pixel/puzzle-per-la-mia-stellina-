@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Puzzle per la mia stellina ❤</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #ffe6f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #d6336c;
+      text-shadow: 1px 1px 3px #fff;
+      text-align: center;
+    }
+    canvas {
+      border: 3px solid #d6336c;
+      border-radius: 12px;
+      margin-top: 20px;
+      touch-action: none; /* Evita lo scroll mentre si gioca */
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      background: #d6336c;
+      color: white;
+      font-size: 16px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #b52d59;
+    }
+  </style>
+</head>
+<body>
+  <h1>✨ Puzzle per la mia stellina ✨</h1>
+  <canvas id="puzzleCanvas" width="360" height="360"></canvas>
+  <button onclick="shuffle()">Mescola</button>
+
+  <script>
+    const canvas = document.getElementById("puzzleCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // 🔹 Sostituisci con i link RAW delle tue immagini caricate su GitHub
+    const images = [
+      "https://raw.githubusercontent.com/tuonome/tuo-repo/main/foto1.jpg",
+      "https://raw.githubusercontent.com/tuonome/tuo-repo/main/foto2.jpg",
+      "https://raw.githubusercontent.com/tuonome/tuo-repo/main/foto3.jpg"
+    ];
+
+    let img = new Image();
+    let pieces = [];
+    let rows = 3, cols = 3;
+    let pieceWidth, pieceHeight;
+    let selectedPiece = null;
+
+    function loadImage() {
+      img.src = images[Math.floor(Math.random() * images.length)];
+      img.onload = () => {
+        pieceWidth = canvas.width / cols;
+        pieceHeight = canvas.height / rows;
+        createPieces();
+        shuffle();
+      };
+    }
+
+    function createPieces() {
+      pieces = [];
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          pieces.push({
+            sx: x * pieceWidth,
+            sy: y * pieceHeight,
+            x: x * pieceWidth,
+            y: y * pieceHeight
+          });
+        }
+      }
+    }
+
+    function drawPuzzle() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      pieces.forEach(p => {
+        ctx.drawImage(
+          img,
+          p.sx, p.sy, pieceWidth, pieceHeight,
+          p.x, p.y, pieceWidth, pieceHeight
+        );
+        ctx.strokeRect(p.x, p.y, pieceWidth, pieceHeight);
+      });
+    }
+
+    function shuffle() {
+      pieces.forEach(p => {
+        p.x = Math.floor(Math.random() * cols) * pieceWidth;
+        p.y = Math.floor(Math.random() * rows) * pieceHeight;
+      });
+      drawPuzzle();
+    }
+
+    function getPieceAt(mx, my) {
+      return pieces.find(
+        p => mx > p.x && mx < p.x + pieceWidth && my > p.y && my < p.y + pieceHeight
+      );
+    }
+
+    function swapPieces(p1, p2) {
+      let tx = p1.x, ty = p1.y;
+      p1.x = p2.x; p1.y = p2.y;
+      p2.x = tx; p2.y = ty;
+    }
+
+    // 🔹 Controlli mouse
+    canvas.addEventListener("mousedown", e => {
+      selectedPiece = getPieceAt(e.offsetX, e.offsetY);
+    });
+
+    canvas.addEventListener("mouseup", e => {
+      if (selectedPiece) {
+        const target = getPieceAt(e.offsetX, e.offsetY);
+        if (target) swapPieces(selectedPiece, target);
+        selectedPiece = null;
+        drawPuzzle();
+      }
+    });
+
+    // 🔹 Controlli touch (mobile)
+    canvas.addEventListener("touchstart", e => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.touches[0].clientX - rect.left;
+      const y = e.touches[0].clientY - rect.top;
+      selectedPiece = getPieceAt(x, y);
+    });
+
+    canvas.addEventListener("touchend", e => {
+      if (selectedPiece) {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.changedTouches[0].clientX - rect.left;
+        const y = e.changedTouches[0].clientY - rect.top;
+        const target = getPieceAt(x, y);
+        if (target) swapPieces(selectedPiece, target);
+        selectedPiece = null;
+        drawPuzzle();
+      }
+    });
+
+    loadImage();
+  </script>
+</body>
+</html>
