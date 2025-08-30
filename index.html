@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puzzle per la mia stellina 💕</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive;
+      background: linear-gradient(135deg, #ffdde1, #ee9ca7);
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      margin: 15px 0;
+      font-size: 26px;
+      color: #d6336c;
+      text-shadow: 2px 2px 4px #fff;
+    }
+    #puzzle-container {
+      margin: 10px auto;
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 3px;
+      max-width: 310px;
+    }
+    .piece {
+      width: 100px;
+      height: 100px;
+      background-size: 300px 300px;
+      border-radius: 6px;
+      cursor: grab;
+      touch-action: none;
+    }
+    #message {
+      margin-top: 20px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #fff;
+      display: none;
+      animation: pop 1s ease forwards;
+    }
+    @keyframes pop {
+      0% { transform: scale(0.2); opacity: 0; }
+      80% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+    button {
+      background: #ff4d6d;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      margin: 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #e63e5e;
+    }
+  </style>
+</head>
+<body>
+  <h1>Puzzle per la mia stellina 💕</h1>
+
+  <div>
+    <button onclick="loadPuzzle(0)">Puzzle 1</button>
+    <button onclick="loadPuzzle(1)">Puzzle 2</button>
+    <button onclick="loadPuzzle(2)">Puzzle 3</button>
+  </div>
+
+  <div id="puzzle-container"></div>
+  <div id="message">🎉 Congratulazioni amore mio 💖 Hai completato il puzzle! 🎉</div>
+
+  <script>
+    const images = [
+      "https://github.com/ajigyasingh2-pixel/puzzle-per-la-mia-stellina-/blob/main/Immagine%20WhatsApp%202025-08-29%20ore%2021.43.45_99d0e556.jpg?raw=true",
+      "https://github.com/ajigyasingh2-pixel/puzzle-per-la-mia-stellina-/blob/main/Immagine%20WhatsApp%202025-08-29%20ore%2021.41.38_b87a6608.jpg?raw=true",
+      "https://github.com/ajigyasingh2-pixel/puzzle-per-la-mia-stellina-/blob/main/Immagine%20WhatsApp%202025-08-29%20ore%2021.44.28_0ef508eb.jpg?raw=true"
+    ];
+
+    const puzzle = document.getElementById("puzzle-container");
+    const message = document.getElementById("message");
+    let currentImage = 0;
+
+    function loadPuzzle(index) {
+      puzzle.innerHTML = "";
+      message.style.display = "none";
+      currentImage = index;
+
+      let pieces = [];
+      for (let i = 0; i < 9; i++) {
+        const div = document.createElement("div");
+        div.classList.add("piece");
+        div.setAttribute("draggable", "true"); // FIX: drag funziona
+        div.style.backgroundImage = url(${images[index]});
+        let x = (i % 3) * -100;
+        let y = Math.floor(i / 3) * -100;
+        div.style.backgroundPosition = ${x}px ${y}px;
+        div.dataset.correct = i;
+        pieces.push(div);
+      }
+
+      // mischiamo i pezzi
+      pieces.sort(() => Math.random() - 0.5);
+      pieces.forEach(p => puzzle.appendChild(p));
+
+      enableDrag();
+    }
+
+    function enableDrag() {
+      let dragged = null;
+
+      document.querySelectorAll(".piece").forEach(piece => {
+        piece.addEventListener("dragstart", e => {
+          dragged = piece;
+        });
+
+        piece.addEventListener("dragover", e => e.preventDefault());
+
+        piece.addEventListener("drop", e => {
+          e.preventDefault();
+          if (dragged && dragged !== piece) {
+            swapPieces(dragged, piece);
+          }
+        });
+
+        // supporto touch
+        piece.addEventListener("touchstart", e => {
+          dragged = piece;
+        });
+        piece.addEventListener("touchend", e => {
+          let touch = e.changedTouches[0];
+          let target = document.elementFromPoint(touch.clientX, touch.clientY);
+          if (target && target.classList.contains("piece") && target !== dragged) {
+            swapPieces(dragged, target);
+          }
+        });
+      });
+    }
+
+    function swapPieces(p1, p2) {
+      let temp = p2.cloneNode(true);
+      puzzle.replaceChild(p1.cloneNode(true), p2);
+      puzzle.replaceChild(temp, p1);
+      enableDrag();
+      checkWin();
+    }
+
+    function checkWin() {
+      const pieces = document.querySelectorAll(".piece");
+      for (let i = 0; i < pieces.length; i++) {
+        if (pieces[i].dataset.correct != i) return;
+      }
+      message.style.display = "block";
+    }
+
+    // carica il primo puzzle di default
+    loadPuzzle(0);
+  </script>
+</body>
+</html>
