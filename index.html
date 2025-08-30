@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Puzzle Romantico 💕</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #ffdde1, #ee9ca7);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+    h1 {
+      color: #fff;
+      font-size: 2em;
+      text-shadow: 2px 2px 5px #ff5e78;
+    }
+    #game {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .letters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 15px 0;
+    }
+    .letter {
+      background: #fff;
+      border: 2px solid #ff5e78;
+      border-radius: 10px;
+      padding: 10px 15px;
+      margin: 5px;
+      cursor: pointer;
+      font-size: 1.2em;
+      transition: transform 0.2s;
+    }
+    .letter:hover {
+      transform: scale(1.1);
+      background: #ffeff3;
+    }
+    #currentGuess {
+      font-size: 1.5em;
+      margin: 15px 0;
+      color: #fff;
+    }
+    #message {
+      font-size: 1.8em;
+      font-weight: bold;
+      margin-top: 20px;
+      color: #fff;
+      text-shadow: 2px 2px 8px #ff5e78;
+    }
+    .heart {
+      position: fixed;
+      top: -20px;
+      color: red;
+      font-size: 20px;
+      animation: fall linear;
+    }
+    @keyframes fall {
+      to {
+        transform: translateY(110vh);
+        opacity: 0;
+      }
+    }
+    #finalMessage {
+      display: none;
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 2px 2px 10px #ff5e78;
+      animation: pop 1s ease-in-out infinite alternate;
+      margin-top: 30px;
+    }
+    @keyframes pop {
+      from { transform: scale(1); }
+      to { transform: scale(1.1); }
+    }
+  </style>
+</head>
+<body>
+  <h1>Indovina la Frase Romantica 💖</h1>
+  <div id="game">
+    <p id="instruction">Ricostruisci la frase toccando le lettere nell’ordine giusto ✨</p>
+    <div class="letters" id="letters"></div>
+    <p id="currentGuess"></p>
+    <button onclick="resetGuess()">Cancella</button>
+    <p id="message"></p>
+    <div id="finalMessage">✨ La mia stellina sei tu 💕 ✨</div>
+  </div>
+
+  <script>
+    const phrases = [
+      "Ti penso sempre",
+      "Un abbraccio forte",
+      "Sei la mia gioia",
+      "Vorrei vederti ora",
+      "Mi manchi tanto",
+      "Ti voglio bene"
+    ];
+
+    let currentPhraseIndex = 0;
+    let currentGuess = "";
+
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function startGame() {
+      currentGuess = "";
+      document.getElementById("currentGuess").innerText = "";
+      document.getElementById("message").innerText = "";
+
+      const phrase = phrases[currentPhraseIndex].toUpperCase();
+      const letters = phrase.replace(/ /g, "").split("");
+      const shuffled = shuffle([...letters]);
+
+      const lettersDiv = document.getElementById("letters");
+      lettersDiv.innerHTML = "";
+
+      shuffled.forEach(letter => {
+        const btn = document.createElement("div");
+        btn.className = "letter";
+        btn.innerText = letter;
+        btn.onclick = () => chooseLetter(letter, btn);
+        lettersDiv.appendChild(btn);
+      });
+    }
+
+    function chooseLetter(letter, btn) {
+      currentGuess += letter;
+      document.getElementById("currentGuess").innerText = currentGuess;
+      btn.style.visibility = "hidden";
+
+      if (currentGuess === phrases[currentPhraseIndex].toUpperCase().replace(/ /g, "")) {
+        document.getElementById("message").innerText = "Bravo! ❤";
+        createHearts();
+        setTimeout(() => {
+          currentPhraseIndex++;
+          if (currentPhraseIndex < phrases.length) {
+            startGame();
+          } else {
+            document.getElementById("letters").innerHTML = "";
+            document.getElementById("instruction").style.display = "none";
+            document.getElementById("finalMessage").style.display = "block";
+          }
+        }, 1500);
+      }
+    }
+
+    function resetGuess() {
+      startGame();
+    }
+
+    function createHearts() {
+      for (let i = 0; i < 15; i++) {
+        const heart = document.createElement("div");
+        heart.className = "heart";
+        heart.innerText = "💖";
+        heart.style.left = Math.random() * 100 + "vw";
+        heart.style.animationDuration = (Math.random() * 2 + 3) + "s";
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 5000);
+      }
+    }
+
+    startGame();
+  </script>
+</body>
+</html>
